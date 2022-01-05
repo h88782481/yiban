@@ -5,7 +5,7 @@ import requests
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 #第一次登录链接，等号后边放自己的token
-tokenurl = "http://211.68.191.30/epidemic/index?token=6071cd04863c91c4589a50deab8dacaebd95e051"
+tokenurl = "http://211.68.191.30/epidemic/index?token="
 #签到链接
 qiandaourl = "http://211.68.191.30/epidemic/student/sign"
 #验证码链接
@@ -49,9 +49,9 @@ def yzm(s):
     captcha=s.get(url=captchaurl)
     base64_data = base64.b64encode(captcha.content)
     img = base64_data.decode()
-    result=uploadJson('data:image/jpeg;base64,'+str(img), "eAg92dIFAGXnbSX3", "120008", "h88782481", "字母区分大小写")
+    result=uploadJson('data:image/jpeg;base64,'+str(img), "自己的授权码", "自己的题型", "自己的账号", "字母区分大小写")
     time.sleep(20)
-    result=queryJson("eAg92dIFAGXnbSX3",result['msg'])
+    result=queryJson("自己的授权码",result['msg'])
     return result
 
 
@@ -65,7 +65,7 @@ def bchh(s):
 #签到
 def qiandao(s,result):
     data = {
-        "data": r"""{"realName":"张天翔","collegeName":"现代科技学院","className":"计算机科学与技术1901","studentId":"2018614150204","answer":"{\"q1\":\"是\",\"q2\":\"是\",\"q3\":\"是\",\"q4\":\"是\",\"q4_1\":\"\",\"q5\":\"是\",\"q6\":\"是\",\"q6_1\":\"\",\"position\":\"河北省石家庄市正定县057乡道33号靠近正定县南牛乡东洋小学\"}"}""",  # 直接抓post数据然后填
+        "data": r"""这里放自己的请求信息""",  # 直接抓post数据然后填
         "captcha": result['msg']
     }
     req=s.post(url=qiandaourl,data=data)
@@ -89,6 +89,9 @@ if __name__ == "__main__":
         result=yzm(s)
         code=qiandao(s,result)
     scheduler = BlockingScheduler()
+    #设置15分钟自动活动一次会话
     scheduler.add_job(bchh, 'interval', minutes=15 ,args=[s])
+    #设置三点一分自动签到
     scheduler.add_job(qiandao, 'cron', hour='3', minute='1' ,args=[s,result])
+    #启动自动任务
     scheduler.start()
